@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-17%2B-blue) ![JavaFX](https://img.shields.io/badge/JavaFX-19-purple) ![Sockets](https://img.shields.io/badge/TCP%2FIP-Sockets-orange) ![Concurrency](https://img.shields.io/badge/Thread--per--client-Model-green)
 
 ## 📌 Overview
-A production-grade chat application demonstrating core networking principles with:
+A chat application demonstrating core networking principles with:
 - **Java Sockets** for low-level communication  
 - **JavaFX** for modern GUI  
 - **Thread-per-client** architecture for scalability  
