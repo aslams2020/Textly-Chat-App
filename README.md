@@ -8,11 +8,6 @@ A chat application demonstrating core networking principles with:
 - **JavaFX** for modern GUI  
 - **Thread-per-client** architecture for scalability  
 
-<!--
-![Textly Demo](https://via.placeholder.com/800x500?text=Textly+Chat+Application+Screenshot)  
-*(Replace with actual screenshot)*
--->
-
 ## ✨ Features
 | Category        | Implementation Details |
 |-----------------|-----------------------|
@@ -42,6 +37,10 @@ sequenceDiagram
     Server->>Client B: Broadcast Message
     Client B->>Server: Typing Notification
 ```
+
+**Screenshot :**
+![image](https://github.com/user-attachments/assets/70a79f6e-d147-4c31-bd7d-d3e4c95952b8)
+
 
 ### 🚀 Installation
 - JDK 17+
