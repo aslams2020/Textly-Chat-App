@@ -1,2 +1,4 @@
-ClientHandler.class
-Server.class
+client\Client.class
+Launcher.class
+server\Server.class
+server\ClientHandler.class
