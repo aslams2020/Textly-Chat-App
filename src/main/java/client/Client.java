@@ -97,6 +97,22 @@ public class Client extends Application {
         primaryStage.show();
 
         listenForMessages();
+        primaryStage.setOnCloseRequest(event -> {
+            try {
+                // Send exit command to server before closing
+                if (out != null) {
+                    out.println("exit");
+                }
+                // Close connection
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+                System.err.println("Error closing connection: " + e.getMessage());
+            }
+        });
+
+        primaryStage.show();
     }
 
     private String showUsernameDialog() {
@@ -122,7 +138,34 @@ public class Client extends Application {
 
         out.println(message);
         messageField.clear();
-        appendMessage("You", message, Color.BLUE);
+
+        // Don't show "exit" message in your own chat
+        if (!message.equalsIgnoreCase("exit")) {
+            appendMessage("You", message, Color.BLUE);
+        } else {
+            // If user types exit, close the application properly
+            Platform.runLater(() -> {
+                appendMessage("System", "Disconnecting... Goodbye!", Color.GRAY);
+                messageField.setDisable(true);
+                sendButton.setDisable(true);
+
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1500);
+
+                        // Close resources
+                        if (socket != null && !socket.isClosed()) {
+                            socket.close();
+                        }
+
+                        Platform.exit();
+
+                    } catch (IOException | InterruptedException e) {
+                        Platform.exit();
+                    }
+                }).start();
+            });
+        }
     }
 
     private void listenForMessages() {
@@ -130,8 +173,9 @@ public class Client extends Application {
             try {
                 String message;
                 while ((message = in.readLine()) != null) {
-                    System.out.println("Received: " + message); // Debug output
+                    System.out.println("Received: " + message);
 
+                    // Handle messages as before...
                     if (message.startsWith("USERLIST:")) {
                         updateUserList(message.substring(9));
                     } else if (message.startsWith("Welcome")) {
@@ -142,11 +186,19 @@ public class Client extends Application {
                         String[] parts = message.split(":", 2);
                         appendMessage(parts[0].trim(), parts[1].trim(), Color.DARKGREEN);
                     } else {
-                        appendMessage("Unknown", message, Color.GRAY); // Fallback
+                        appendMessage("Unknown", message, Color.GRAY);
                     }
                 }
             } catch (IOException e) {
-                appendMessage("Error", "Connection lost: " + e.getMessage(), Color.RED);
+                Platform.runLater(() -> {
+                    appendMessage("Error", "Connection to server lost", Color.RED);
+
+                    // Disable UI when connection is lost
+                    messageField.setDisable(true);
+                    sendButton.setDisable(true);
+
+                    appendMessage("System", "Please restart the application", Color.GRAY);
+                });
             }
         }).start();
     }
