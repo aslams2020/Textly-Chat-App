@@ -50,6 +50,42 @@
     -fx-text-fill: white;
 }
 
+/* User List Improvements */
+.user-list {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 5;
+}
+
+.user-list .list-cell {
+    -fx-padding: 8 5;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 12px;
+}
+
+.user-list .list-cell:filled:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+.user-list .list-cell:filled:selected {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+/* Scrollbar styling */
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #c1c1c1;
+    -fx-background-radius: 5;
+}
+
 /* Input Area */
 .input-container {
     -fx-spacing: 10;
