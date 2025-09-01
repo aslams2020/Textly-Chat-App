@@ -1,3 +1,4 @@
+package server;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -33,8 +34,11 @@ public class Server {
     public static void updateUserLists() {
         StringBuilder userList = new StringBuilder("USERLIST:");
         synchronized (clientHandlers) {
-            for (ClientHandler client : clientHandlers) {
-                userList.append(client.getUsername()).append(",");
+            Iterator<ClientHandler> it = clientHandlers.iterator();
+            while (it.hasNext()) {
+                userList.append(it.next().getUsername());
+                if (it.hasNext())
+                    userList.append(",");
             }
         }
         String listMessage = userList.toString();
