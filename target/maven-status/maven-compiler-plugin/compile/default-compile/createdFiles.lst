@@ -1,4 +1,4 @@
 client\Client.class
-Launcher.class
 server\Server.class
+util\ConfigLoader.class
 server\ClientHandler.class
