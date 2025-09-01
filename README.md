@@ -48,3 +48,8 @@ sequenceDiagram
 
 🔗 Connect: [GitHub](https://github.com/aslams2020) | [LinkedIn](https://www.linkedin.com/in/aslamsayyad02/) <br>
 📧 Contact: sayyadaslam2020@gmail.com
+
+<!--
+mvn exec:java -D"exec.mainClass=server.Server"
+mvn exec:java "-Dexec.mainClass=client.Client"
+-->
