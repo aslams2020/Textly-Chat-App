@@ -2,6 +2,8 @@ package client;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -23,7 +25,7 @@ public class Client extends Application {
     private PrintWriter out;
     private BufferedReader in;
     private String username;
-    private TextFlow messageFlow;
+    private VBox messageFlow;
     private TextField messageField;
     private Button sendButton;
     private ListView<String> userList;
@@ -42,23 +44,23 @@ public class Client extends Application {
             System.exit(0);
 
         // Set up connection
-        // Set up connection
         try {
             socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out.println(username); // Send username to server
+            out.println(username);
             appendMessage("System", "Connected to server successfully!", Color.GREEN);
         } catch (IOException e) {
             appendMessage("Error", "Failed to connect to server: " + e.getMessage(), Color.RED);
             System.exit(1);
         }
-        // Create UI
-        messageFlow = new TextFlow();
-        messageFlow.setPrefHeight(300);
-        ScrollPane messageScroll = new ScrollPane(messageFlow);
-        messageScroll.setFitToWidth(true);
 
+        // Create UI components
+        VBox messageContainer = new VBox();
+        messageContainer.setSpacing(5);
+        messageScroll = new ScrollPane(messageContainer);
+        messageFlow = messageContainer;
+        messageScroll.setFitToWidth(true);
         messageField = new TextField();
         messageField.setPromptText("Type a message...");
 
@@ -68,13 +70,30 @@ public class Client extends Application {
         userList = new ListView<>();
         userList.setPrefWidth(150);
 
+        // Create main layout - ONLY ONCE!
         HBox mainLayout = new HBox(10,
                 new VBox(10, messageScroll, new HBox(10, messageField, sendButton)),
                 userList);
         mainLayout.setPadding(new javafx.geometry.Insets(10));
 
+        // Apply CSS styling
+        mainLayout.getStyleClass().add("root");
+        messageScroll.getStyleClass().add("message-scroll");
+        userList.getStyleClass().add("user-list");
+        messageField.getStyleClass().add("message-field");
+        sendButton.getStyleClass().add("send-button");
+
+        // Create scene with CSS
+        Scene scene = new Scene(mainLayout, 600, 400);
+        try {
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            System.out.println("CSS loaded successfully!");
+        } catch (Exception e) {
+            System.out.println("CSS file not found, using default styling");
+        }
+
         primaryStage.setTitle("Chat - " + username);
-        primaryStage.setScene(new Scene(mainLayout, 600, 400));
+        primaryStage.setScene(scene);
         primaryStage.show();
 
         listenForMessages();
@@ -134,18 +153,49 @@ public class Client extends Application {
 
     private void appendMessage(String sender, String message, Color color) {
         Platform.runLater(() -> {
-            Text timestamp = new Text("[" + timeFormat.format(new Date()) + "] ");
+            HBox messageRow = new HBox();
+            messageRow.setPadding(new Insets(5, 10, 5, 10));
+
+            // Align right for own messages, left for others
+            if (sender.equals("You")) {
+                messageRow.setAlignment(Pos.CENTER_RIGHT);
+            } else {
+                messageRow.setAlignment(Pos.CENTER_LEFT);
+            }
+
+            VBox messageBubble = new VBox();
+            messageBubble.setPadding(new Insets(8, 12, 8, 12));
+            messageBubble.setMaxWidth(250);
+
+            // Style bubbles differently for sender vs others
+            if (sender.equals("You")) {
+                messageBubble.setStyle("-fx-background-color: #dcf8c6; -fx-background-radius: 15 15 0 15;");
+            } else {
+                messageBubble.setStyle(
+                        "-fx-background-color: #ffffff; -fx-background-radius: 15 15 15 0; -fx-border-color: #e0e0e0; -fx-border-radius: 15 15 15 0;");
+            }
+
+            Text timestamp = new Text(timeFormat.format(new Date()));
             timestamp.setFill(Color.GRAY);
             timestamp.setStyle("-fx-font-size: 10px;");
 
-            Text senderText = new Text(sender + ": ");
+            Text senderText = new Text(sender + ":");
             senderText.setFill(color);
             senderText.setStyle("-fx-font-weight: bold;");
 
-            Text messageText = new Text(message + "\n");
+            Text messageText = new Text(message);
+            messageText.setWrappingWidth(230); // Allow text wrapping
 
-            messageFlow.getChildren().addAll(timestamp, senderText, messageText);
+            if (sender.equals("You")) {
+                messageBubble.getChildren().addAll(senderText, messageText, timestamp);
+            } else {
+                messageBubble.getChildren().addAll(timestamp, senderText, messageText);
+            }
 
+            messageRow.getChildren().add(messageBubble);
+            messageFlow.getChildren().add(messageRow); // Add to VBox
+
+            // Auto-scroll to bottom
             if (messageScroll != null) {
                 messageScroll.setVvalue(1.0);
             }
@@ -155,12 +205,15 @@ public class Client extends Application {
     private void updateUserList(String users) {
         Platform.runLater(() -> {
             userList.getItems().clear();
-            for (String u : users.split(",")) {
-                String t = u.trim();
-                if (!t.isEmpty())
-                    userList.getItems().add(t);
+            for (String user : users.split(",")) {
+                if (!user.trim().isEmpty()) {
+                    String statusEmoji = "🟢 "; // Online
+                    if (user.equals(username)) {
+                        statusEmoji = "⭐ "; // Current user
+                    }
+                    userList.getItems().add(statusEmoji + user.trim());
+                }
             }
         });
     }
-
 }
