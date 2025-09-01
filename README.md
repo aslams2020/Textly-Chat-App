@@ -16,6 +16,35 @@ A chat application demonstrating core networking principles with:
 | **GUI**         | Color-coded messages (User/Server/System), Dynamic user list |
 | **Stability**   | Graceful disconnection handling, Input validation |
 
+## Installation & Running
+
+1. Compile The Project  : 
+```java
+mvn clean compile
+```
+
+
+2. Run the Server : 
+```java
+mvn exec:java -D"exec.mainClass=server.Server"
+```
+
+3. Run Clients (in separate terminals)
+```java
+mvn exec:java -D"exec.mainClass=client.Client"
+```
+
+## How to Use
+1. Start the server first
+
+2. Launch multiple client instances
+
+3. Enter a username (3-20 alphanumeric characters)
+
+4. Start chatting in real-time!
+
+5. Type "exit" to leave the chat
+
 ## 🛠 Tech Stack
 ```mermaid
 pie
