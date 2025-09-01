@@ -35,7 +35,8 @@ public class Client extends Application {
     public void start(Stage primaryStage) throws Exception {
         // Get username
         username = showUsernameDialog();
-        if (username == null) System.exit(0);
+        if (username == null)
+            System.exit(0);
 
         // Set up connection
         socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
@@ -58,10 +59,9 @@ public class Client extends Application {
         userList = new ListView<>();
         userList.setPrefWidth(150);
 
-        HBox mainLayout = new HBox(10, 
-            new VBox(10, messageScroll, new HBox(10, messageField, sendButton)),
-            userList
-        );
+        HBox mainLayout = new HBox(10,
+                new VBox(10, messageScroll, new HBox(10, messageField, sendButton)),
+                userList);
         mainLayout.setPadding(new javafx.geometry.Insets(10));
 
         primaryStage.setTitle("Chat - " + username);
@@ -72,7 +72,7 @@ public class Client extends Application {
     }
 
     private String showUsernameDialog() {
-        TextInputDialog dialog = new TextInputDialog("User" + (int)(Math.random()*1000));
+        TextInputDialog dialog = new TextInputDialog("User" + (int) (Math.random() * 1000));
         dialog.setTitle("Username");
         dialog.setHeaderText("Choose a username");
         dialog.setContentText("Username:");
@@ -116,7 +116,7 @@ public class Client extends Application {
             Text senderText = new Text(sender + ": ");
             senderText.setFill(color);
             Text messageText = new Text(message + "\n");
-            
+
             messageFlow.getChildren().addAll(timestamp, senderText, messageText);
         });
     }
@@ -124,7 +124,12 @@ public class Client extends Application {
     private void updateUserList(String users) {
         Platform.runLater(() -> {
             userList.getItems().clear();
-            userList.getItems().addAll(users.split(","));
+            for (String u : users.split(",")) {
+                String t = u.trim();
+                if (!t.isEmpty())
+                    userList.getItems().add(t);
+            }
         });
     }
+
 }
