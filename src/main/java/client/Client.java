@@ -9,6 +9,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.*;
+import util.ConfigLoader;
+
 import java.io.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
@@ -26,6 +28,7 @@ public class Client extends Application {
     private Button sendButton;
     private ListView<String> userList;
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    private ScrollPane messageScroll;
 
     public static void main(String[] args) {
         launch(args);
@@ -39,11 +42,17 @@ public class Client extends Application {
             System.exit(0);
 
         // Set up connection
-        socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-        out = new PrintWriter(socket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out.println(username); // Send username to server
-
+        // Set up connection
+        try {
+            socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out.println(username); // Send username to server
+            appendMessage("System", "Connected to server successfully!", Color.GREEN);
+        } catch (IOException e) {
+            appendMessage("Error", "Failed to connect to server: " + e.getMessage(), Color.RED);
+            System.exit(1);
+        }
         // Create UI
         messageFlow = new TextFlow();
         messageFlow.setPrefHeight(300);
@@ -81,11 +90,20 @@ public class Client extends Application {
 
     private void sendMessage() {
         String message = messageField.getText().trim();
-        if (!message.isEmpty()) {
-            out.println(message);
-            messageField.clear();
-            appendMessage("You", message, Color.BLUE);
+        int maxLength = ConfigLoader.getMaxMessageLength();
+
+        if (message.isEmpty()) {
+            return;
         }
+
+        if (message.length() > maxLength) {
+            appendMessage("System", "Message too long (max " + maxLength + " characters)", Color.RED);
+            return;
+        }
+
+        out.println(message);
+        messageField.clear();
+        appendMessage("You", message, Color.BLUE);
     }
 
     private void listenForMessages() {
@@ -93,6 +111,8 @@ public class Client extends Application {
             try {
                 String message;
                 while ((message = in.readLine()) != null) {
+                    System.out.println("Received: " + message); // Debug output
+
                     if (message.startsWith("USERLIST:")) {
                         updateUserList(message.substring(9));
                     } else if (message.startsWith("Welcome")) {
@@ -102,10 +122,12 @@ public class Client extends Application {
                     } else if (message.contains(":")) {
                         String[] parts = message.split(":", 2);
                         appendMessage(parts[0].trim(), parts[1].trim(), Color.DARKGREEN);
+                    } else {
+                        appendMessage("Unknown", message, Color.GRAY); // Fallback
                     }
                 }
             } catch (IOException e) {
-                appendMessage("Error", "Connection lost", Color.RED);
+                appendMessage("Error", "Connection lost: " + e.getMessage(), Color.RED);
             }
         }).start();
     }
@@ -113,11 +135,20 @@ public class Client extends Application {
     private void appendMessage(String sender, String message, Color color) {
         Platform.runLater(() -> {
             Text timestamp = new Text("[" + timeFormat.format(new Date()) + "] ");
+            timestamp.setFill(Color.GRAY);
+            timestamp.setStyle("-fx-font-size: 10px;");
+
             Text senderText = new Text(sender + ": ");
             senderText.setFill(color);
+            senderText.setStyle("-fx-font-weight: bold;");
+
             Text messageText = new Text(message + "\n");
 
             messageFlow.getChildren().addAll(timestamp, senderText, messageText);
+
+            if (messageScroll != null) {
+                messageScroll.setVvalue(1.0);
+            }
         });
     }
 
