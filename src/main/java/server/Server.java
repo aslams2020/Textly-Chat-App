@@ -1,4 +1,5 @@
 package server;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -8,11 +9,17 @@ public class Server {
     private static Set<ClientHandler> clientHandlers = Collections.synchronizedSet(new HashSet<>());
 
     public static void main(String[] args) {
+        Server server = new Server(); // Create instance for non-static access
+        server.startServer();
+    }
+
+    public void startServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server started on port " + PORT);
+            
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                ClientHandler handler = new ClientHandler(clientSocket);
+                ClientHandler handler = new ClientHandler(clientSocket, this); // Pass 'this' reference
                 clientHandlers.add(handler);
                 new Thread(handler).start();
             }
@@ -34,11 +41,8 @@ public class Server {
     public static void updateUserLists() {
         StringBuilder userList = new StringBuilder("USERLIST:");
         synchronized (clientHandlers) {
-            Iterator<ClientHandler> it = clientHandlers.iterator();
-            while (it.hasNext()) {
-                userList.append(it.next().getUsername());
-                if (it.hasNext())
-                    userList.append(",");
+            for (ClientHandler client : clientHandlers) {
+                userList.append(client.getUsername()).append(",");
             }
         }
         String listMessage = userList.toString();
@@ -55,4 +59,5 @@ public class Server {
         }
         updateUserLists();
     }
+
 }
