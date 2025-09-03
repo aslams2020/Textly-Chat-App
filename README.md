@@ -44,6 +44,15 @@ mvn exec:java -D"exec.mainClass=client.Client"
 4. Start chatting in real-time!
 
 5. Type "exit" to leave the chat
+   
+**Screenshot :**
+
+![image1](https://github.com/user-attachments/assets/4d3234a6-6148-4e84-8b94-b75e2216fb4c)
+
+
+![image](https://github.com/user-attachments/assets/70a79f6e-d147-4c31-bd7d-d3e4c95952b8)
+
+
 
 ## 🛠 Tech Stack
 ```mermaid
@@ -66,9 +75,6 @@ sequenceDiagram
     Server->>Client B: Broadcast Message
     Client B->>Server: Typing Notification
 ```
-
-**Screenshot :**
-![image](https://github.com/user-attachments/assets/70a79f6e-d147-4c31-bd7d-d3e4c95952b8)
 
 
 ### 🚀 Installation
